@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.teraenergy.groupware.dashboard.mapper.ScheduleMapper">
+
+	<!-- 캘린더 일정 정보 가져오기 -->
+	<select id="get_calender" resultType="java.util.HashMap">
+		SELECT
+		id, title, description, write_user, target_user,
+		(CASE WHEN
+		all_day = 1 THEN '1'
+		WHEN all_day = 2 THEN '2'
+		WHEN all_day = 3
+		THEN '3'
+		ELSE 'null' END) AS 'all_day',
+		<!-- IF(all_day, 'true', 'false') AS all_day, -->
+		<!-- start, date_format(start_time, '%H:%i') AS start_time, end, date_format(end_time, 
+			'%H:%i') AS end_time, -->
+		(CASE WHEN event_type = 1 THEN '공통'
+		WHEN event_type = 2 THEN '내일정'
+		WHEN
+		event_type = 3 THEN '공유일정'
+		ELSE 'null' END) AS 'event_type',
+		file_path,
+		backgroundColor, test_start_date AS start, test_end_date AS end
+		FROM
+		schedule_tbl
+		ORDER BY id DESC
+	</select>
+
+	<!-- 일정 등록 -->
+	<insert id="insert_schedule">
+		INSERT INTO schedule_tbl(
+		title, description,
+		target_user,
+		test_start_date, test_end_date,
+		event_type,
+		backgroundColor, all_day
+		)
+		VALUES (
+		#{m.title}, #{m.description},
+		#{m.target_user},
+		#{m.start}, #{m.end},
+		#{m.event_type},
+		#{m.backgroundColor}, #{m.all_day}
+		)
+	</insert>
+
+	<!-- 일정 수정 -->
+	<update id="update_schedule">
+		UPDATE schedule_tbl SET
+		title = #{m.title},
+		description = #{m.description},
+		target_user = #{m.target_user},
+		test_start_date = #{m.start},
+		test_end_date = #{m.end},
+		event_type =
+		#{m.event_type},
+		backgroundColor = #{m.backgroundColor},
+		all_day =
+		#{m.all_day}
+		WHERE id = #{m.id}
+	</update>
+
+	<!-- 일정 삭제 -->
+	<delete id="delete_schedule">
+		DELETE FROM schedule_tbl WHERE id = #{check_id};
+	</delete>
+
+
+	<!-- 부서 별 이름 불러오기 -->
+	<select id="select_department" resultType="string">
+		SELECT 
+		code_name 
+		FROM common_code WHERE code_value LIKE '%dept%'
+	</select>
+
+
+	<!-- 부서 별 이름 불러오기 -->
+	<select id="select_user_department" resultType="string">
+		SELECT
+		user_info.kr_name, common_code.code_name
+		FROM((SELECT * FROM user_info)
+		AS user_info
+		LEFT JOIN (SELECT * FROM common_code) AS common_code ON
+		user_info.department = common_code.code_value)
+		WHERE
+		common_code.code_name = #{param}
+	</select>
+
+	<!-- 알람 인벤토리 -->
+	<select id="show_alarm" resultType="HashMap">
+		SELECT *
+		FROM
+		test_alarm_inventory
+		ORDER BY id
+	</select>
+
+	<!-- <select id="show_alarm" resultType="HashMap"> SELECT user_info.kr_name, 
+		common_code.code_name FROM((SELECT * FROM user_info) AS user_info LEFT JOIN 
+		(SELECT * FROM common_code) AS common_code ON user_info.department = common_code.code_value) 
+		</select> -->
+</mapper>

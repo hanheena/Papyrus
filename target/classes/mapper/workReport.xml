@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teraenergy.groupware.workReport.mapper.WorkReportMapper">
+	<sql id="searchSql">
+		<choose>
+			<when test="searchType == 'title'">AND wr.title LIKE CONCAT('%', #{keyword}, '%') </when>
+			<when test="searchType == 'content'">AND wr.content LIKE CONCAT('%', #{keyword}, '%') </when>
+			<when test="searchType == 'title_content'">AND (wr.title LIKE CONCAT('%', #{keyword}, '%') OR wr.content LIKE CONCAT('%', #{keyword}, '%')) </when>
+			<when test="searchType == 'writer'">AND ui.kr_name LIKE CONCAT('%', #{keyword}, '%') </when>
+			<when test="searchType == 'searchDay'">AND DATE_FORMAT(wr.report_dt, '%Y-%m-%d') = #{startDay} </when>
+			<when test="searchType == 'searchDayRange'">
+			<![CDATA[
+				AND DATE(wr.report_dt) >= #{startDay} AND DATE(wr.report_dt) <= #{endDay}
+			]]>
+			</when>
+			<otherwise> </otherwise>
+		</choose>
+	</sql>
+	<sql id="reportTypeSql">
+		<choose>
+			<when test="array == 'DAY'">AND wr.report_type = 'DAY' </when>
+			<when test="array == 'WEEK'">AND wr.report_type = 'WEEK' </when>
+			<when test="array == 'DAY,WEEK'">AND (wr.report_type = 'DAY' OR wr.report_type = 'WEEK') </when>
+		</choose>
+	</sql>
+
+	<!-- 부서 불러오기 -->
+	<select id="getDept" parameterType="map" resultType="String">
+		SELECT cc.code_name
+		FROM common_code cc right OUTER JOIN user_info ui
+		ON cc.code_value = ui.department
+		WHERE ui.department = #{userInfo.department}
+		AND ui.user_id = #{userInfo.userId}
+	</select>
+	
+	<select resultType="double" id="workReportCnt">
+		SELECT COUNT(a.id) FROM(
+			SELECT wr.*, ui.kr_name AS kr_name 
+			FROM work_report wr LEFT JOIN user_info ui
+			ON wr.insert_id = ui.user_id
+			WHERE wr.del_yn = 'N'
+			<include refid="reportTypeSql"/>
+			<include refid="searchSql"/>
+		) a
+	</select>
+	<!-- 업무보고 리스트 -->
+	<select id="workReportList" resultType="HashMap">
+		SELECT wr.*, ui.kr_name AS kr_name 
+			FROM work_report wr LEFT JOIN user_info ui
+			ON wr.insert_id = ui.user_id
+			WHERE wr.del_yn = 'N'
+		<include refid="reportTypeSql"/>
+		<include refid="searchSql"/>
+	ORDER BY 
+		<choose>
+			<when test="sort == 'recent'">wr.id DESC</when>
+			<when test="sort == 'old'">wr.id ASC</when>
+			<otherwise>
+				wr.id DESC
+			</otherwise>
+		</choose>
+		LIMIT #{page.startRow}, #{page.row_per_page} 
+	</select>
+	
+	<!-- 업무보고 작성 -->
+	<insert id="workReportSave" parameterType="map">
+		INSERT INTO
+			work_report (report_type, report_dt, title, content, insert_id, insert_dt) 
+		VALUES
+			(#{report_type}, NOW(), #{title}, #{content}, '1', NOW())
+	</insert>
+	<!-- 업무보고 상세 보기 -->
+	<select id="workReportDetail" resultType="map">
+		SELECT
+			wr.*, (SELECT ui.kr_name FROM user_info ui WHERE wr.insert_id = ui.user_id) AS kr_name
+		FROM
+			work_report wr
+		WHERE
+			wr.id = #{id} AND wr.del_yn = 'N' 
+	</select>
+	
+	<!-- 업무보고 수정 -->
+	<update id="workReportChange" parameterType="map">
+		UPDATE
+			WORK_REPORT
+		SET
+			report_type = #{report_type}, report_dt = #{report_dt}, title=#{title}, content = #{content},update_id = #{update_id}, update_dt = NOW()
+		WHERE
+			id = #{id}
+	</update>
+
+	<update id="workReportDelete" parameterType="map">
+		UPDATE
+			work_report
+		SET
+			del_yn = 'Y',delete_id = #{userInfo.userId},delete_dt = NOW()
+		WHERE
+		id = #{id}
+	</update>
+	
+	<select id="getModifyReport" resultType="String">
+		SELECT CONTENT FROM work_report WHERE ID = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teraenergy.groupware.personnel.mapper.PersonnelMapper">
+	
+	<select id="listDept" parameterType="map" resultType="camelmap">		
+		SELECT "0" AS code_id, "0" AS code_type_id, "" AS code_value, "전체" AS code_name, "1" AS seq, COUNT(0) AS user_count 
+		FROM user_info ui
+		WHERE ui.del_yn = 'N'
+
+		
+		UNION ALL 
+		
+		SELECT dept.code_id, dept.code_type_id, dept.code_value, dept.code_name, dept.seq, COUNT(ui.department) AS user_count
+		FROM (
+			SELECT cc.code_id, cc.code_type_id, cc.code_value, cc.code_name, cc.seq 
+			FROM common_code_type cct, common_code cc
+			WHERE cct.code_type_id = cc.code_type_id
+			AND cct.code_value = #{codeValue}
+			ORDER BY cc.seq ASC 
+		) AS dept
+		LEFT JOIN user_info ui on dept.code_value = ui.department AND ui.del_yn = 'N'
+		GROUP BY dept.code_id
+	</select>
+	
+	<select id="listDeptUser" parameterType="map" resultType="camelmap">
+		SELECT a.*
+		FROM (	
+			SELECT 
+				ui.user_id, ui.kr_name
+				,ui.place_work, pw.code_name AS place_work_name
+				,ui.department, de.code_name AS department_name
+				,ui.position, po.code_name AS position_name
+				,ui.duty, du.code_name AS duty_name
+				,ui.work_type, wt.code_name AS work_type_name
+				,IFNULL (du.seq, 999) AS duty_seq
+				,IFNULL (po.seq, 999) AS position_seq
+				,IFNULL (wt.seq, 999) AS work_type_seq
+			FROM user_info ui  
+			LEFT JOIN common_code pw ON ui.place_work = pw.code_value
+			LEFT JOIN common_code de ON ui.department = de.code_value
+			LEFT JOIN common_code po ON ui.position = po.code_value
+			LEFT JOIN common_code du ON ui.duty = du.code_value
+			LEFT JOIN common_code wt ON ui.work_type = wt.code_value
+	
+			WHERE ui.del_yn = 'N'
+			<if test='department != null  and department != "" '>
+				AND ui.department = #{department}
+			</if>
+			<if test='workTypes != null  and workTypes.size != 0 '>
+				AND ui.work_type IN 
+				<foreach collection="workTypes" index="index" item="type" open="(" separator="," close=")" >
+					#{type}
+				</foreach>
+			</if>
+			<if test='workTypes == null  or workTypes.size == 0 '>
+				AND ui.work_type = null
+			</if>
+			GROUP BY ui.user_id
+		) a
+		ORDER BY a.duty_seq ASC, a.position_seq ASC, a.work_type_seq ASC
+	</select>
+	
+	<select id="selectUserInfo" parameterType="map" resultType="camelmap">
+		SELECT 
+			ui.user_id, ui.login_id, ui.kr_name, ui.en_name, ui.birth_dt, ui.phone_num, ui.post_num, ui.addr1, ui.addr2, ui.email
+			, ui.place_work, ui.department, ui.position, ui.duty, ui.work_type, ui.state, ui.auth, ui.commute_yn, ui.del_yn, ui.papers_yn
+			, ui.skill_yn, ui.resign_dt, ui.emply_dt, ui.insert_id, ui.insert_dt, ui.update_id, ui.update_dt, ui.delete_id, ui.delete_dt
+			, pw.code_name AS place_work_name, de.code_name AS department_name, po.code_name AS position_name, du.code_name AS duty_name
+			, wt.code_name AS work_type_name, st.code_name AS state_name, au.code_name AS auth_name
+		FROM user_info ui
+		LEFT JOIN common_code pw ON ui.place_work = pw.code_value
+		LEFT JOIN common_code de ON ui.department = de.code_value
+		LEFT JOIN common_code po ON ui.position = po.code_value
+		LEFT JOIN common_code du ON ui.duty = du.code_value
+		LEFT JOIN common_code wt ON ui.work_type = wt.code_value
+		LEFT JOIN common_code st ON ui.state = st.code_value		
+		LEFT JOIN common_code au ON ui.auth = au.code_value		
+		WHERE ui.del_yn = 'N'
+		AND ui.user_id = #{userId}
+	</select>
+	
+	<update id="updateUserInfo" parameterType="map" >
+		UPDATE user_info
+		SET 
+			kr_name			= #{krName}
+			<if test='enName != null  and enName != "" '>
+				,en_name		= #{enName}
+			</if>
+			<if test='birthDt != null  and birthDt != "" '>				
+				,birth_dt		= #{birthDt}
+			</if>
+			<if test='postNum != null  and postNum != "" '>				
+				,post_num		= #{postNum}
+			</if>
+			<if test='addr1 != null  and addr1 != "" '>				
+				,addr1			= #{addr1}
+			</if>
+			<if test='addr2 != null  and addr2 != "" '>
+				,addr2			= #{addr2}
+			</if>
+			<if test='email != null  and email != "" '>
+				,email			= #{email}
+			</if>
+			<if test='placeWork != null  and placeWork != "" '>
+				,place_work		= #{placeWork}
+			</if>
+			<if test='department != null  and department != "" '>
+				,department		= #{department}
+			</if>
+			<if test='position != null  and position != "" '>
+				,position		= #{position}
+			</if>
+			<if test='duty != null  and duty != "" '>
+				,duty			= #{duty}
+			</if>
+			<if test='workType != null  and workType != "" '>
+				,work_type		= #{workType}
+			</if>
+			<if test='resignDt != null  and resignDt != "" '>
+				,resign_dt		= #{resignDt}
+			</if>
+			<if test='emplyDt != null  and emplyDt != "" '>
+				,emply_dt		= #{emplyDt}
+			</if>
+			<if test='updateId != null  and updateId != "" '>
+				,update_id		= #{updateId}
+			</if>
+			<if test='updateDt != null  and updateDt != "" '>
+				,update_dt		= #{updateDt}
+			</if>
+		WHERE 
+			user_id			= #{userId}
+	</update>
+
+	<update id="updateCheckedYn" parameterType="map" >
+		<if test="type != null and type != ''">
+			UPDATE user_info
+			SET
+				<if test='type == "commuteYn"'>
+					commute_yn		= #{value}
+				</if>
+				<if test='type == "papersYn"'>
+					papers_yn		= #{value}
+				</if>
+				<if test='type == "skillYn"'>
+					skill_yn		= #{value}
+				</if>
+			WHERE 
+				user_id			= #{userId}
+		</if>
+	</update>
+	
+	<!-- 박종진 추가 -->
+	<select id="get_skill_career_by_userid"   resultType="com.teraenergy.groupware.personnel.vo.SkillInventoryCareerVO" >
+		SELECT 
+		sics.id
+		,sics.user_id
+		,CASE 
+			WHEN sics.internal=1 THEN
+				sics.work_name
+			ELSE
+				pmp.projectname 
+		END as work_name
+		,sics.workcode
+		,cc.code_value as order_from_code_value
+		,cc.code_name as order_from_name
+		,sics.work_start_dt
+		,sics.work_end_dt
+		,sics.client_name
+		,sics.role
+		,sics.working_company
+		,CASE 
+			WHEN sics.internal=1 THEN
+				sics.working_company
+			ELSE
+				'테라에너지'
+		END as working_company
+		,sics.position
+		,sics.code_language
+		,sics.rdbms
+		,sics.framework
+		,sics.internal_skill
+		,sics.os
+		,sics.dev_tool
+		,sics.dev_specific
+		,sics.internal
+		,sics.commoncode_place
+		FROM skill_inventory_career_skill as sics
+		LEFT JOIN project_manage_projectinfo as pmp ON pmp.id=sics.workcode
+		LEFT JOIN common_code as cc ON cc.code_value=pmp.order_from
+		WHERE sics.user_id = #{userId}
+		ORDER BY sics.created_at DESC
+		LIMIT 1000
+    </select>
+    
+    <select id="get_a_skill_career_by_id"   resultType="com.teraenergy.groupware.personnel.vo.SkillInventoryCareerVO" >
+		SELECT 
+		sics.id
+		,sics.user_id
+		,CASE 
+			WHEN sics.internal=1 THEN
+				sics.work_name
+			ELSE
+				pmp.projectname 
+		END as work_name
+		,sics.workcode
+		,cc.code_value as order_from_code_value
+		,cc.code_name as order_from_name
+		,sics.work_start_dt
+		,sics.work_end_dt
+		,sics.client_name
+		,sics.role
+		,sics.working_company
+		,CASE 
+			WHEN sics.internal=1 THEN
+				sics.working_company
+			ELSE
+				'테라에너지'
+		END as working_company
+		,sics.position
+		,sics.code_language
+		,sics.rdbms
+		,sics.framework
+		,sics.internal_skill
+		,sics.os
+		,sics.dev_tool
+		,sics.dev_specific
+		,sics.internal
+		,sics.commoncode_place
+		FROM skill_inventory_career_skill as sics
+		LEFT JOIN project_manage_projectinfo as pmp ON pmp.id=sics.workcode
+		LEFT JOIN common_code as cc ON cc.code_value=pmp.order_from
+        WHERE sics.id = #{id}
+        LIMIT 1
+    </select>
+    
+	<select id="get_place_list"   resultType="com.teraenergy.groupware.personnel.vo.PlaceVO" >
+        SELECT *
+        FROM common_code
+        WHERE code_type_id = 4
+        LIMIT 1000
+    </select>
+    
+    <select id="get_project_list"   resultType="com.teraenergy.groupware.personnel.vo.ProjectManageProjectinfoVO" >
+        SELECT
+         *
+        FROM project_manage_projectinfo
+        ORDER BY created_at DESC
+        LIMIT 1000
+    </select>
+    
+    <insert id="insert_skill_inventory_career" parameterType="com.teraenergy.groupware.personnel.vo.SkillInventoryCareerVO" useGeneratedKeys="true" keyProperty="id">
+			insert into skill_inventory_career_skill
+				( 
+				user_id
+				,work_name
+				,workcode
+				,commoncode_place
+				,work_start_dt
+				,work_end_dt
+				,client_name
+				,role
+				,working_company
+				,position
+				,code_language
+				,rdbms
+				,framework
+				,internal_skill
+				,os
+				,dev_tool
+				,dev_specific
+				,internal
+				  )
+			VALUES ( 
+				#{userId,jdbcType=VARCHAR}
+				,#{workName,jdbcType=VARCHAR}
+				,#{workcode,jdbcType=VARCHAR}
+				,#{commoncodePlace,jdbcType=VARCHAR}
+				,#{workStartDt,jdbcType=VARCHAR}
+				,#{workEndDt,jdbcType=VARCHAR}
+				,#{clientName,jdbcType=VARCHAR}
+				,#{role,jdbcType=VARCHAR}
+				,#{workingCompany,jdbcType=VARCHAR}
+				,#{position,jdbcType=VARCHAR}
+				,#{codeLanguage,jdbcType=VARCHAR}
+				,#{rdbms,jdbcType=VARCHAR}
+				,#{framework,jdbcType=VARCHAR}
+				,#{internalSkill,jdbcType=VARCHAR}
+				,#{os,jdbcType=VARCHAR}
+				,#{devTool,jdbcType=VARCHAR}
+				,#{devSpecific,jdbcType=VARCHAR}
+				,#{internal,jdbcType=VARCHAR}
+				  )
+
+	</insert>
+	
+	<update id="update_skill_inventory_career" parameterType="com.teraenergy.groupware.personnel.vo.SkillInventoryCareerVO">
+		UPDATE skill_inventory_career_skill
+		SET 
+			user_id = #{userId,jdbcType=VARCHAR}
+			,work_name = #{workName,jdbcType=VARCHAR}
+			,workcode = #{workcode,jdbcType=VARCHAR}
+			,commoncode_place = #{commoncodePlace,jdbcType=VARCHAR}
+			,work_start_dt = #{workStartDt,jdbcType=VARCHAR}
+			,work_end_dt = #{workEndDt,jdbcType=VARCHAR}
+			,client_name = #{clientName,jdbcType=VARCHAR}
+			,role = #{role,jdbcType=VARCHAR}
+			,working_company = #{workingCompany,jdbcType=VARCHAR}
+			,position = #{position,jdbcType=VARCHAR}
+			,code_language = #{codeLanguage,jdbcType=VARCHAR}
+			,rdbms = #{rdbms,jdbcType=VARCHAR}
+			,framework = #{framework,jdbcType=VARCHAR}
+			,internal_skill = #{internalSkill,jdbcType=VARCHAR}
+			,os = #{os,jdbcType=VARCHAR}
+			,dev_tool = #{devTool,jdbcType=VARCHAR}
+			,dev_specific = #{devSpecific,jdbcType=VARCHAR}
+			,internal = #{internal,jdbcType=VARCHAR}
+
+		WHERE 1=1
+		AND	id=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="get_list_from_commoncode" parameterType="String"  resultType="com.teraenergy.common.vo.CommonCodeVO" >
+        SELECT
+         *
+         ,(SELECT code_name FROM common_code_type as cct WHERE cct.code_type_id=cc.code_type_id) as codeTypeName
+        FROM common_code as cc
+        WHERE 1=1
+        AND code_type_id=#{codeTypeId}
+        ORDER BY seq
+        LIMIT 1000
+    </select>
+    
+    <insert id="insert_project_mng_info" parameterType="com.teraenergy.groupware.personnel.vo.ProjectManageProjectinfoVO" useGeneratedKeys="true" keyProperty="id">
+			insert into project_manage_projectinfo
+				( 
+				projectname
+				,order_from
+				,start_dt
+				,end_dt
+				,memo
+				  )
+			VALUES ( 
+				#{projectname,jdbcType=VARCHAR}
+				,#{orderFrom,jdbcType=VARCHAR}
+				,#{startDt,jdbcType=VARCHAR}
+				,#{endDt,jdbcType=VARCHAR}
+				,#{memo,jdbcType=VARCHAR}
+				  )
+
+	</insert>
+	
+	 <insert id="insert_commoncode" parameterType="com.teraenergy.common.vo.CommonCodeVO" useGeneratedKeys="true" keyProperty="codeId">
+			insert into common_code
+				( 
+				code_type_id
+				,code_value
+				,code_name
+				,seq
+
+				  )
+			VALUES ( 
+				#{codeTypeId,jdbcType=VARCHAR}
+				,#{codeValue,jdbcType=VARCHAR}
+				,#{codeName,jdbcType=VARCHAR}
+				,(SELECT MAX(seq)+1 FROM common_code as cc2 WHERE cc2.code_type_id=#{codeTypeId})
+				  )
+
+	</insert>
+	
+	<update id="update_commoncode" parameterType="com.teraenergy.common.vo.CommonCodeVO">
+		UPDATE common_code
+		SET 
+			code_type_id=#{codeTypeId,jdbcType=VARCHAR}
+			,code_value=#{codeValue,jdbcType=VARCHAR}
+			,code_name=#{codeName,jdbcType=VARCHAR}
+			,seq=#{seq,jdbcType=VARCHAR}
+
+		WHERE 1=1
+		AND	code_id=#{codeId,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delete_skill_inven_career_by_id" parameterType="String">
+		DELETE FROM skill_inventory_career_skill
+		WHERE id=#{skillInvenCareerId}
+	</delete>
+	
+	<update id="update_project_info" parameterType="com.teraenergy.groupware.personnel.vo.ProjectManageProjectinfoVO">
+		UPDATE project_manage_projectinfo
+		SET 
+			projectname=#{projectname,jdbcType=VARCHAR}
+			,order_from=#{orderFrom,jdbcType=VARCHAR}
+			,start_dt=#{startDt,jdbcType=VARCHAR}
+			,end_dt=#{endDt,jdbcType=VARCHAR}
+			,memo=#{memo,jdbcType=VARCHAR}
+			
+		WHERE 1=1
+		AND	id=#{id,jdbcType=VARCHAR}
+	</update>
+	<!-- 박종진 추가 끝-->
+	
+	<!-- 소영 추가 -->
+	<select id="selectSkilInventoryBasic"  resultType="camelmap" parameterType="map" >
+        SELECT *
+        FROM skill_inventory_basic
+        WHERE user_id = #{userId}
+    </select>
+    
+ 	<insert id="skilInventoryBasicInsert"  parameterType="map" >
+  
+ 		INSERT INTO skill_inventory_basic (user_id ,final_education,final_school,grad_dt,major ,certificate_kind,certificate_dt,etc ,techlvl ) 
+		VALUES (#{userId},#{finalEducation},#{finalSchool},#{gradDt}, #{major},#{certificateKind},#{certificateDt}, #{etc}, #{techlvl} )
+        
+    </insert>
+  
+    <update id="skilInventoryBasicUpdate" parameterType="map" >
+        UPDATE skill_inventory_basic  SET final_education=#{finalEducation},final_school=#{finalSchool},grad_dt=#{gradDt},major= #{major},certificate_kind=#{certificateKind},certificate_dt=#{certificateDt},etc=#{etc},techlvl=#{techlvl}
+        WHERE  user_id = #{userId}
+    </update>
+    <!-- 소영 END -->
+    
+    <select resultType="map" parameterType="map" id="careerInfo">
+    	SELECT sib.*, DATE_FORMAT(MIN(sics.work_start_dt), '%Y년 %m월') AS work_start_dt, DATE_FORMAT(Max(sics.work_end_dt), '%Y년 %m월') AS work_end_dt
+    	FROM skill_inventory_basic sib LEFT OUTER JOIN skill_inventory_career_skill sics
+    	ON sib.user_id = sics.user_id
+    	WHERE sib.user_id = #{userId} 
+    </select>
+
+	<select resultType="HashMap" id="skillInfo">
+		SELECT *
+		FROM skill_inventory_career_skill
+		WHERE user_id = #{userId}
+	</select>
+</mapper>

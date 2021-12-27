@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teraenergy.groupware.projectmanage.mapper.ProjectManageMapper">
+
+	<select id="get_all_manage"  resultType="com.teraenergy.groupware.projectmanage.vo.ProjectManageVO">		
+		SELECT
+		pm.id
+		,pm.project_id
+		,pm.location_id
+		,pm.user_id
+		,ui.kr_name
+		,cc.code_name
+		,ui.department
+		,DATE_FORMAT(pm.start_dt,'%Y-%m-%d %H:%i:%S') start_dt
+		,DATE_FORMAT(pm.end_dt,'%Y-%m-%d %H:%i:%S') end_dt
+		,pml.locname
+		,pmp.projectname
+		FROM project_manage as pm
+		LEFT JOIN project_manage_locinfo as pml ON pml.id=pm.location_id
+		LEFT JOIN project_manage_projectinfo as pmp ON pmp.id=pm.project_id
+		LEFT JOIN user_info as ui ON pm.user_id=ui.user_id
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		
+		ORDER BY pm.start_dt, pm.end_dt DESC
+		LIMIT 1000
+	</select>
+	
+	<select id="get_a_manage" parameterType="int" resultType="com.teraenergy.groupware.projectmanage.vo.ProjectManageVO">		
+		SELECT
+		pm.id
+		,pm.project_id
+		,pm.location_id
+		,pm.user_id
+		,ui.kr_name
+		,cc.code_name
+		,ui.department
+		,DATE_FORMAT(pm.start_dt,'%Y-%m-%d %H:%i:%S') start_dt
+		,DATE_FORMAT(pm.end_dt,'%Y-%m-%d %H:%i:%S') end_dt
+		,pml.locname
+		,pmp.projectname
+		FROM project_manage as pm
+		LEFT JOIN project_manage_locinfo as pml ON pml.id=pm.location_id
+		LEFT JOIN project_manage_projectinfo as pmp ON pmp.id=pm.project_id
+		LEFT JOIN user_info as ui ON pm.user_id=ui.user_id
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		
+		WHERE id=#{id,jdbcType=VARCHAR}
+		LIMIT 1000
+	</select>
+	
+	<select id="get_all_projectinfo"  resultType="com.teraenergy.groupware.projectmanage.vo.ProjectManageProjectinfoVO">		
+		SELECT
+		*
+		FROM project_manage_projectinfo
+		
+		ORDER BY projectname
+		LIMIT 1000
+	</select>
+	
+	<select id="get_all_locinfo"  resultType="com.teraenergy.groupware.projectmanage.vo.ProjectManageProjectinfoVO">		
+		SELECT
+		*
+		FROM project_manage_locinfo
+		
+		ORDER BY locname
+		LIMIT 1000
+	</select>
+
+	<insert id="insert_manage" parameterType="com.teraenergy.groupware.projectmanage.vo.ProjectManageVO" useGeneratedKeys="true" keyProperty="id">
+			insert into project_manage
+				( 
+				project_id
+				,location_id
+				,user_id
+				,start_dt
+				,end_dt
+				,memo
+				  )
+			VALUES ( 
+				#{projectId,jdbcType=VARCHAR}
+				,#{locationId,jdbcType=VARCHAR}
+				,#{userId,jdbcType=VARCHAR}
+				,#{startDt,jdbcType=VARCHAR}
+				,#{endDt,jdbcType=VARCHAR}
+				,#{memo,jdbcType=VARCHAR}
+				  )
+
+	</insert>
+	
+
+	<insert id="insert_projectinfo" parameterType="com.teraenergy.groupware.projectmanage.vo.ProjectManageProjectinfoVO" useGeneratedKeys="true" keyProperty="id">
+			insert into project_manage_projectinfo
+				( 
+				projectname
+				  )
+			VALUES ( 
+				#{projectname,jdbcType=VARCHAR}
+				  )
+
+	</insert>
+	
+	<insert id="insert_locinfo" parameterType="com.teraenergy.groupware.projectmanage.vo.ProjectManagelocinfoVO" useGeneratedKeys="true" keyProperty="id">
+			insert into project_manage_locinfo
+				( 
+				locname
+				  )
+			VALUES ( 
+				#{locname,jdbcType=VARCHAR}
+				  )
+
+	</insert>
+	
+	
+	<update id="update_manage" parameterType="com.teraenergy.groupware.projectmanage.vo.ProjectManageVO">
+		UPDATE project_manage
+		SET 
+			project_id = #{projectId,jdbcType=VARCHAR}
+			location_id = #{locationId,jdbcType=VARCHAR}
+			user_id = #{userId,jdbcType=VARCHAR}
+			start_dt = #{startDt,jdbcType=VARCHAR}
+			end_dt = #{endDt,jdbcType=VARCHAR}
+			memo = #{memo,jdbcType=VARCHAR}
+
+		WHERE 1=1
+		AND	id=#{id,jdbcType=VARCHAR}
+		 
+			
+	</update>
+	
+	<delete id="delete_manage" parameterType="int">
+		DELETE 
+		FROM project_manage
+		WHERE id=#{id,jdbcType=VARCHAR}
+	</delete>
+	
+	<select resultType="map" id="getProjectName">
+		SELECT projectname
+		FROM project_manage_projectinfo
+	</select>
+	
+	<select resultType="map" id="selectProeject">
+		SELECT pmp.*, cc.code_name
+		FROM project_manage_projectinfo pmp left JOIN common_code cc
+		ON pmp.order_from = cc.code_value 
+			<trim prefixOverrides="AND" prefix="WHERE">
+				<choose>
+					<when test="projectName != null || order_from != null || startDt != null || endDt != null">
+						<if test="projectName != 'all_projectName'">AND projectname = #{projectName} </if>
+						<if test="order_from != 'all_Loc'">AND order_from = #{order_from} </if>
+						<if test="startDt != '기간 시작'">
+							<![CDATA[
+								AND DATE(start_dt) >= #{startDt}
+							]]>
+						</if>
+						<if test="endDt != '기간 종료'">
+							<![CDATA[
+								AND DATE(end_dt) <= #{endDt}
+							]]>
+						</if>
+					</when>
+					<otherwise> </otherwise>
+				</choose>
+			</trim>
+	</select>
+</mapper>
