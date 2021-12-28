@@ -43,6 +43,7 @@ public class ElectApprovController {
 	@Autowired
 	private ElectApprovFileService electApprovFileService;
 
+	//결제건 리스트 가져오기
 	@GetMapping(value = "/papyrus/elecapprov_list")
 	public String elecapprov_list(@RequestParam(value = "status", defaultValue = "1") String status,
 			HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
@@ -68,6 +69,7 @@ public class ElectApprovController {
 		return "groupware/elecapprov/elecapprov_list";
 	}
 
+	//결제할 카테고리 리스트 가져오기
 	@GetMapping(value = "/papyrus/elecapprov_category_list")
 	public String elecapprov_category_list(HttpServletRequest request, HttpServletResponse response, Model model)
 			throws Exception {
@@ -79,6 +81,7 @@ public class ElectApprovController {
 		return "groupware/elecapprov/elecapprov_category_list";
 	}
 
+	//결제건에 대한 상세정보
 	@GetMapping(value = "/papyrus/elecapprov_detail")
 	public String elecapprov_detail(@RequestParam(defaultValue = "-1") int id, String formTableName
 			,HttpServletRequest request,
@@ -109,6 +112,7 @@ public class ElectApprovController {
 		}
 	}
 
+	// 결제건 insert,update form
 	@GetMapping(value = "/papyrus/elecapprov_edit")
 	public String elecapprov_edit(@RequestParam(defaultValue = "-1") int categoryId,
 			@RequestParam(defaultValue = "-1") int elecApprovId, String formTableName, HttpServletRequest request,
@@ -157,6 +161,7 @@ public class ElectApprovController {
 
 	}
 
+	// 결제건 insert,update
 	@PostMapping(value = "/papyrus/elecapprov_edit")
 	public String elecapprov_edit_post(ElectApprovVO electApprov,
 			@RequestParam(name = "refUserId", required = false) List<String> refUserId,
@@ -184,6 +189,7 @@ public class ElectApprovController {
 		return "redirect:/papyrus/elecapprov_list";
 	}
 
+	//결제승인 버튼 눌렀을시 처리
 	@PostMapping(value = "/papyrus/allow_electapprov")
 	@ResponseBody
 	public String allow_electapprov(@RequestParam(defaultValue = "-1") int electApprovId,
@@ -202,6 +208,7 @@ public class ElectApprovController {
 		return result+"";
 	}
 	
+	//결제 반려 버튼 눌렀을시 처리
 	@PostMapping(value = "/papyrus/disallow_electapprov")
 	@ResponseBody
 	public String disallow_electapprov(@RequestParam(defaultValue = "-1") int electApprovId,
@@ -240,6 +247,7 @@ public class ElectApprovController {
 		return result+"";
 	}
 	
+	/* 임시 컨트롤러. 부서코드를 이용하여 유저목록 가져오기 */
 	@GetMapping(value = "/papyrus/get_users_by_department")
 	@ResponseBody
 	public Map<String,Object> get_users_by_department(String department,
