@@ -16,7 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
 	 * registry .addResourceHandler("/filepath/**")
 	 * .addResourceLocations("file:///c:/filepath/"); }
 	 */
-
+	
+	/* 인터셉터 설정 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/papyrus/dashboard")

@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<!-- <typeAliases>
+	<typeAlias alias=""/>
+</typeAliases> 
+camelmap
+-->
+<mapper namespace="com.teraenergy.groupware.elecapproval.mapper.ElectApprovMapper">
+
+	
+	<select id="getAllElectApprovByStatus" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO">		
+		SELECT
+		ea.id
+		,ea.user_id
+		,ea.category_id
+		,ea.status
+		,ea.form_table_name
+		,DATE_FORMAT(ea.created_at,'%Y-%m-%d %H:%i:%S') created_at
+		,DATE_FORMAT(ea.updated_at,'%Y-%m-%d %H:%i:%S') updated_at
+		FROM elect_approv as ea
+		JOIN elect_approv_ref as eaf ON ea.id=eaf.electapprov_id
+		JOIN elect_approv_line as eal ON ea.id=eal.electapprov_id
+		JOIN user_info as ui ON ea.user_id=ui.user_id
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		
+		WHERE ui.del_yn='N'
+		AND status=#{status}
+		AND (
+			ea.user_id=#{userId}
+			OR eaf.user_id=#{userId}
+			OR (eal.user_id=#{userId} AND eal.b4yn='Y')
+		)
+		GROUP BY ea.id
+		ORDER BY ui.kr_name
+		LIMIT 1000
+	</select>
+	
+	<select id="getAElectApprov" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO">		
+		SELECT
+		ea.id
+		,ea.user_id
+		,ea.category_id
+		,ea.status
+		,ea.form_table_name
+		,DATE_FORMAT(ea.created_at,'%Y-%m-%d %H:%i:%S') created_at
+		,DATE_FORMAT(ea.updated_at,'%Y-%m-%d %H:%i:%S') updated_at
+		,ea.approv_id
+		,eac.name as categoryName
+		,CASE 
+		WHEN (SELECT id FROM elect_approv as _ea WHERE _ea.id = ea.id AND _ea.user_id=#{userId}) = ea.id THEN 'writer'
+		WHEN (SELECT electapprov_id FROM elect_approv_ref as eaf WHERE eaf.electapprov_id = ea.id AND eaf.user_id=#{userId}) = ea.id THEN 'refuser'
+		WHEN (SELECT electapprov_id FROM elect_approv_line as eal WHERE eal.electapprov_id = ea.id AND eal.user_id=#{userId} AND eal.b4yn='Y' AND eal.allow_pressed_yn='N' ) = ea.id THEN 'lineuser_pressed_n'
+		WHEN (SELECT electapprov_id FROM elect_approv_line as eal WHERE eal.electapprov_id = ea.id AND eal.user_id=#{userId} AND eal.b4yn='Y' AND eal.allow_pressed_yn='Y' ) = ea.id THEN 'lineuser_pressed_y'
+		ELSE
+			'unknown'
+		END as eamode
+
+		FROM elect_approv as ea
+		LEFT JOIN elect_approv_category as eac ON ea.category_id=eac.id
+		WHERE ea.id=#{id}
+		AND del_yn='N'
+		LIMIT 1
+	</select>
+	
+	<select id="getAElectApprovCommon" parameterType="int" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO">		
+		SELECT
+		*
+		FROM elect_approv_form_common
+		WHERE electapprov_id=#{electApprovId}
+		LIMIT 1
+	</select>
+	
+	<select id="getACategoryById" parameterType="int" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovCategoryVO">		
+		SELECT
+		*
+		FROM elect_approv_category
+		WHERE id=#{id}
+		LIMIT 1
+	</select>
+	
+	<select id="getAllCategories"  resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovCategoryVO">		
+		SELECT
+		*
+		FROM elect_approv_category
+		ORDER BY name
+		LIMIT 1000
+	</select>
+	
+	<select id="get_user_departments"  resultType="com.teraenergy.common.vo.UserVO">		
+		SELECT
+		*
+		FROM common_code
+		WHERE code_type_id=1
+		ORDER BY seq
+		LIMIT 1000
+	</select>
+	
+	<select id="get_user_by_department" parameterType="String" resultType="com.teraenergy.common.vo.UserVO">		
+		SELECT
+		ui.user_id
+		,ui.kr_name
+		,cc.code_value
+		,cc.code_name
+		,cc.seq
+		FROM user_info as ui
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		WHERE ui.del_yn='N'
+		AND ui.department = #{department}
+		ORDER BY ui.kr_name
+		LIMIT 1000
+	</select>
+	
+	<select id="getRefUsers_for_checkbox" parameterType="int" resultType="com.teraenergy.common.vo.UserVO">		
+		SELECT
+		ui.user_id
+		,ui.kr_name
+		,cc.code_value
+		,cc.code_name
+		,cc.seq
+		,IF(eaf.id is not null , 'Y' , null) as checkY
+		FROM user_info as ui
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		LEFT JOIN elect_approv_ref eaf ON eaf.user_id=ui.user_id AND electapprov_id=#{electapprovId}
+		WHERE ui.del_yn='N'
+		ORDER BY ui.kr_name
+		LIMIT 1000
+	</select>
+	<select id="getRefUsers" parameterType="int" resultType="com.teraenergy.common.vo.UserVO">		
+		SELECT
+		ui.user_id
+		,ui.kr_name
+		,cc.code_value
+		,cc.code_name
+		,cc.seq
+		FROM elect_approv_ref as eaf
+		LEFT JOIN user_info as ui ON ui.user_id=eaf.user_id 
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		WHERE eaf.electapprov_id=#{electapprovId}
+		AND ui.del_yn='N'
+		ORDER BY ui.kr_name
+		LIMIT 1000
+	</select>
+	
+	<select id="getRefUsers_for_detail_page" parameterType="int" resultType="com.teraenergy.common.vo.UserVO">		
+		SELECT
+		ui.user_id
+		,ui.kr_name
+		,cc.code_value
+		,cc.code_name
+		,cc.seq
+		FROM elect_approv_ref as eaf
+		LEFT JOIN user_info as ui ON eaf.user_id=ui.user_id
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		WHERE
+		eaf.electapprov_id=#{electapprovId}
+		AND ui.del_yn='N'
+		ORDER BY ui.kr_name
+		LIMIT 1000
+	</select>
+	
+	<select id="getLineUsers" parameterType="int" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovLineVO">		
+		SELECT
+		eal.id
+		,eal.user_id
+		,eal.electapprov_id
+		,eal.lvl
+		,eal.b4yn
+		,ui.kr_name
+		,cc.code_value
+		,cc.code_name
+		FROM elect_approv_line as eal
+		LEFT JOIN user_info as ui ON ui.user_id=eal.user_id AND ui.del_yn='N'
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		
+		WHERE 
+		eal.electapprov_id=#{id}
+		ORDER BY eal.lvl
+		LIMIT 1000
+	</select>
+	
+	<select id="get_a_lineuser_info" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovLineVO" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovLineVO">		
+		SELECT
+		*
+		,(
+			SELECT 
+			user_id
+			FROM elect_approv_line as _eal
+			WHERE _eal.electapprov_id=eal.electapprov_id
+			AND _eal.lvl > eal.lvl
+			ORDER BY _eal.lvl
+			LIMIT 1
+		) as next_line_userid
+		FROM elect_approv_line as eal
+		WHERE 
+		eal.electapprov_id=#{electapprovId}
+		AND eal.user_id=#{userId}
+		LIMIT 1
+	</select>
+	
+	<select id="get_electapprov_uploaded_files" parameterType="int" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovFileVO">		
+		SELECT
+		*
+		FROM elect_approv_file as eafile
+		WHERE 
+		eafile.electapprov_id=#{electapprovId}
+		LIMIT 100
+	</select>
+	
+	<select id="get_a_electapprov_uploaded_file" parameterType="int" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovFileVO">		
+		SELECT
+		*
+		FROM elect_approv_file as eafile
+		WHERE 
+		eafile.id=#{electapprovFileId}
+		LIMIT 1
+	</select>
+	
+	<insert id="insertElecApprov" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO" useGeneratedKeys="true" keyProperty="id">
+		insert into
+		elect_approv(
+			user_id
+			,category_id
+			,form_table_name
+		) values (
+			#{userId,jdbcType=VARCHAR}
+			,#{categoryId,jdbcType=VARCHAR}
+			,#{formTableName,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<insert id="insertElecApprovRef" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovRefVO" >
+		INSERT INTO
+		elect_approv_ref(
+			user_id
+			,electapprov_id
+		) values (
+			#{userId,jdbcType=VARCHAR}
+			,#{electapprovId,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<insert id="insertElecApprovLine" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovLineVO" >
+		INSERT INTO
+		elect_approv_line(
+			user_id
+			,electapprov_id
+			,lvl
+			,b4yn
+		) values (
+			#{userId,jdbcType=VARCHAR}
+			,#{electapprovId,jdbcType=VARCHAR}
+			,#{lvl,jdbcType=VARCHAR}
+			,#{b4yn,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<insert id="insert_elect_approv_form_common" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovLineVO" >
+		INSERT INTO
+		elect_approv_form_common(
+			electapprov_id
+			,title
+			,content
+		) values (
+			#{id,jdbcType=VARCHAR}
+			,#{title,jdbcType=VARCHAR}
+			,#{content,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<insert id="insert_electapprov_files" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovFileVO" >
+		INSERT INTO
+		elect_approv_file(
+			electapprov_id
+			,enc_nm
+			,org_nm
+			,path
+			,size
+			,ext
+			,user_id
+			,mimetype
+
+		) values (
+			#{electapprovId,jdbcType=VARCHAR}
+			,#{encNm,jdbcType=VARCHAR}
+			,#{orgNm,jdbcType=VARCHAR}
+			,#{path,jdbcType=VARCHAR}
+			,#{size,jdbcType=VARCHAR}
+			,#{ext,jdbcType=VARCHAR}
+			,#{userId,jdbcType=VARCHAR}
+			,#{mimetype,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<update id="update_elect_approv_form_common" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO" >
+		UPDATE
+		elect_approv_form_common
+		SET
+			title=#{title,jdbcType=VARCHAR}
+			,content=#{content,jdbcType=VARCHAR}
+		WHERE electapprov_id=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="updateElecApprov" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO" >
+		UPDATE
+		elect_approv
+		SET
+			category_id=#{categoryId,jdbcType=VARCHAR}
+			,status=#{status,jdbcType=VARCHAR}
+			,approv_id=#{approvId,jdbcType=VARCHAR}
+		WHERE id=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="auto_approve_electapprov" parameterType="int" >
+		UPDATE elect_approv as ea
+		SET 
+			ea.status = 
+				CASE
+				WHEN (SELECT count(eal.id) FROM elect_approv_line as eal WHERE eal.electapprov_id=ea.id ) = (SELECT count(eal2.id) FROM elect_approv_line as eal2 WHERE eal2.electapprov_id=ea.id AND allow_pressed_yn='Y')
+				THEN 2
+				ELSE ea.status
+				END
+		WHERE ea.id=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="updateElecApprovLine" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovLineVO" >
+		UPDATE
+		elect_approv_line
+		SET
+			electapprov_id=#{electapprovId,jdbcType=VARCHAR}
+			,user_id=#{userId,jdbcType=VARCHAR}
+			,lvl=#{lvl,jdbcType=VARCHAR}
+			,b4yn=#{b4yn,jdbcType=VARCHAR}
+			,allow_pressed_yn=#{allowPressedYn,jdbcType=VARCHAR}
+		WHERE id=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="deleteElecApprov" parameterType="int">
+		DELETE FROM
+		elect_approv
+
+		WHERE id=#{id,jdbcType=VARCHAR}
+	</delete>
+
+	<delete id="updateCategoryName" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovCategoryVO">
+		UPDATE
+		elect_approv_category
+		SET
+			name=#{name}
+		WHERE id=#{id,jdbcType=VARCHAR}
+	</delete>
+	
+	<delete id="deleteElecApprovLineByElectAprovId" parameterType="int">
+		DELETE FROM 
+		elect_approv_line
+		WHERE electapprov_id=#{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="deleteElecApprovRefByElectAprovId" parameterType="int">
+		DELETE FROM 
+		elect_approv_ref
+		WHERE electapprov_id=#{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="delete_electapprov_file_by_id" parameterType="int">
+		DELETE FROM 
+		elect_approv_file
+		WHERE id=#{id,jdbcType=VARCHAR}
+	</delete>
+</mapper>

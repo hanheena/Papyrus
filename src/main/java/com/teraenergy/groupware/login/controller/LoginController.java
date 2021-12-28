@@ -48,12 +48,6 @@ public class LoginController {
 		}
 		return returnURL;
 	}
-	
-	/* 베이스 레이아웃 페이지 */
-	@GetMapping(value = "/papyrus/basePage")
-	public String basePage() {
-		return "common/basePage";
-	}
 
 	@GetMapping(value = "/papyrus/login")
 	public String login1() {

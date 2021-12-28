@@ -1,0 +1,20 @@
+ .btnSet{
+	text-align: center;
+	margin: 15px auto;
+ }
+
+.pagemain{
+	margin-top: 160px;
+}
+
+.form-select {
+	font-size: 15px;
+}
+
+table th {
+	font-size: 20px;
+}
+
+table td:nth-child(2n) {
+	text-align: left;
+}

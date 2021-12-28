@@ -1,0 +1,41 @@
+@font-face {
+  font-family: 'AppleSDGothicNeo';
+  src: url(/resources/fonts/AppleSDGothicNeoR.woff) format('woff');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'AppleSDGothicNeo';
+  src: url(/resources/fonts/AppleSDGothicNeoM.woff) format('woff');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'AppleSDGothicNeo';
+  src: url(/resources/fonts/AppleSDGothicNeoB.woff) format('woff');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'AppleSDGothicNeo';
+  src: url(/resources/fonts/AppleSDGothicNeoEB.woff) format('woff');
+  font-weight: 900;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url(/resources/fonts/Lato-Light.woff) format('woff');
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url(/resources/fonts/Lato-Regular.woff) format('woff');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url(/resources/fonts/Lato-Medium.woff) format('woff');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url(/resources/fonts/Lato-Bold.woff) format('woff');
+  font-weight: 700;
+}

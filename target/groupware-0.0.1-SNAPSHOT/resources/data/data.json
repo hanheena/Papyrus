@@ -1,0 +1,56 @@
+[{
+    "id": 1,
+    "title": "거래처 미팅",
+    "description": "Lorem ipsum dolor sit incid idunt ut Lorem ipsum sit.",
+    "start": "2021-12-02T09:30",
+    "end": "2021-12-02T15:00",
+    "event_type": "카테고리1",
+    "write_user": "다현",
+    "backgroundColor": "#D25565",
+    "textColor": "#ffffff",
+    "all_day": false
+  }, {
+    "id": 2,
+    "title": "치과예약",
+    "description": "Lorem ipsum dolor sit incid idunt ut Lorem ipsum sit.",
+    "start": "2021-12-01T12:30",
+    "end": "22021-12-01T15:30",
+    "event_type": "카테고리1",
+    "write_user": "나연",
+    "backgroundColor": "#9775fa",
+    "textColor": "#ffffff",
+    "all_day": false
+  }, {
+    "id": 3,
+    "title": "철수 생일",
+    "description": "Lorem ipsum dolor sit incid idunt ut Lorem ipsum sit.",
+    "start": "2021-12-04",
+    "end": "2021-12-04",
+    "event_type": "카테고리2",
+    "write_user": "다현",
+    "backgroundColor": "#ffa94d",
+    "textColor": "#ffffff",
+    "all_day": true
+  }, {
+    "id": 4,
+    "title": "휴가",
+    "description": "Lorem ipsum dolor sit incid idunt ut Lorem ipsum sit.",
+    "start": "2021-12-02",
+    "end": "2021-12-05",
+    "event_type": "카테고리4",
+    "write_user": "사나",
+    "backgroundColor": "#a9e34b",
+    "textColor": "#ffffff",
+    "all_day": true
+  },{
+    "id": 5,
+    "title": "세차예약",
+    "description": "Lorem ipsum dolor sit incid idunt ut Lorem ipsum sit.",
+    "start": "2021-12-02T09:00",
+    "end": "2021-12-02T10:00",
+    "event_type": "카테고리3",
+    "write_user": "정연",
+    "backgroundColor": "#4d638c",
+    "textColor": "#ffffff",
+    "all_day": false
+  }]

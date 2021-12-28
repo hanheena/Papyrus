@@ -1,0 +1,28 @@
+.btnSet {
+	text-align: center;
+	margin: 15px auto;
+}
+
+.pagemain {
+	margin-top: 160px;
+}
+
+input#datepicker.chk.hasDatepicker {
+	text-align: center;
+}
+
+#title {
+	width: 100%;
+}
+
+table th {
+	font-size: 20px;
+}
+
+label {
+	margin-bottom: 0px;
+}
+
+table td:nth-child(2n) {
+	text-align: left;
+}
