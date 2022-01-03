@@ -1,0 +1,12 @@
+{
+  "groups": [
+    {
+      "name": "spring.datasource.hikari.common",
+      "type": "javax.sql.DataSource",
+      "sourceType": "com.teraenergy.common.config.CommonDBConfig",
+      "sourceMethod": "public javax.sql.DataSource commonDataSource() "
+    }
+  ],
+  "properties": [],
+  "hints": []
+}

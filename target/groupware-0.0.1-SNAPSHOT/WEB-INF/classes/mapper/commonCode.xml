@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.teraenergy.groupware.commonCode.mapper.CommonCodeMapper">
+	
+	<select id="listCommonCode" parameterType="map" resultType="camelmap">
+		SELECT cct.code_value AS code_type_value, cct.code_name AS code_type_name, cc.*
+		FROM common_code_type cct, common_code cc
+		WHERE cct.code_type_id = cc.code_type_id
+		AND cct.code_value = #{codeValue}
+		ORDER BY cc.seq ASC 
+	</select>
+	
+	<select id="listCommonCode2" parameterType="map" resultType="camelmap">
+		SELECT cc.*
+		FROM common_code cc
+		WHERE cc.code_type_id = #{codeTypeId}
+		AND cc.code_id NOT IN (#{codeId})
+		ORDER BY cc.seq ASC 
+	</select>
+		
+	<select id="selectCommonCode" parameterType="map" resultType="camelmap">
+		SELECT cc.*
+		FROM common_code_type cct, common_code cc
+		WHERE cct.code_type_id = cc.code_type_id
+		AND cct.code_value = #{codeValue}
+		AND cc.code_id = #{codeId}
+	</select>
+
+	<select id="commonCodeValueCheck" parameterType="map" resultType="int">
+		SELECT COUNT(0) AS code_count
+		FROM common_code cc
+		<choose>
+			<when test="codeId != null and codeId !=''">
+				WHERE cc.code_id NOT IN (#{codeId})
+				AND cc.code_value = #{codeValue}
+			</when>
+			<otherwise>
+				WHERE cc.code_value = #{codeValue}
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	<select id="lastCommonCodeSeqNum" parameterType="map" resultType="camelmap">
+		SELECT cc.*
+		FROM common_code_type cct, common_code cc
+		WHERE cct.code_type_id = cc.code_type_id
+		AND cct.code_value = #{codeValue}
+		ORDER BY cc.seq DESC
+		LIMIT 1 
+	</select>
+	
+	<update id="updateCommonCode" parameterType="map" >
+		UPDATE common_code
+		SET
+			code_value		= #{codeValue} 
+			,code_name		= #{codeName}
+			,seq			= #{seq}
+		WHERE
+			 code_type_id	= #{codeTypeId}
+		AND 
+			code_id			=#{codeId}
+	</update>
+	
+	<insert id="insertCommonCode" parameterType="map" >
+		INSERT INTO 
+		common_code (code_type_id, code_value, code_name, seq)
+		VALUES(#{codeTypeId}, #{codeValue}, #{codeName}, #{seq})	
+	</insert>
+	
+	<select id="commomCodeTypeYn" parameterType="map" resultType="int">
+	    SELECT count(0) FROM common_code_type WHERE code_value = #{codeValueType} AND code_name = #{codeNameType}
+	</select>
+	
+	<select id="lastCommonCodeSeqNum2" parameterType="map" resultType="camelmap">
+		SELECT cc.*
+		FROM common_code cc
+		WHERE cc.code_type_id = #{codeTypeId}
+		ORDER BY cc.code_id DESC
+		LIMIT 1
+	</select>
+	
+	<insert id="insertCommonCodeType" parameterType="map" >
+		INSERT INTO common_code_type 
+		(
+			code_value,
+			code_name
+		) VALUES (
+			#{codeValueType},
+			#{codeNameType}
+		)
+	</insert>
+	
+	<select id="commonCodeTypeId" parameterType="map" resultType="camelmap">
+	    SELECT code_type_id FROM common_code_type WHERE code_value = #{codeValueType} AND code_name = #{codeNameType}
+	</select>
+	
+	<select id="listCommonCode3" parameterType="map" resultType="camelmap">
+		SELECT b.* FROM common_code_type a, common_code b
+		WHERE a.code_type_id = b.code_type_id
+		AND a.code_value = #{codeValueType}
+	</select>
+	
+	<select id="listCommonCodeType" resultType="camelmap">
+	    SELECT * FROM common_code_type
+	</select>
+	
+	<select id="listCommonCodeAll" resultType="camelmap">
+	    SELECT * FROM common_code
+	</select>
+	
+	<delete id="codeTypeDel" parameterType="map">
+	  DELETE FROM common_code_type WHERE code_type_id = #{codeTypeId}
+	</delete>
+	
+	<delete id="codeDel" parameterType="map">
+	  DELETE FROM common_code 
+	  <choose>
+		<when test="codeTypeId != null and codeTypeId !=''">
+			 WHERE code_type_id = #{codeTypeId}
+		</when>
+		<otherwise>
+			 WHERE code_id = #{codeId} 
+		</otherwise>
+	  </choose>
+	</delete>
+	
+</mapper>

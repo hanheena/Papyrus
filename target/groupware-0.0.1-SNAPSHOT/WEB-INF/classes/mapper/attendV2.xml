@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.teraenergy.groupware.attendanceV2.mapper.AttendanceMapperV2">
+
+	<!-- 캘린더 일정 정보 가져오기 -->
+	<select id="get_attend" resultType="java.util.HashMap">
+		SELECT
+		*
+		FROM
+		test_attendance
+	</select>
+
+	<!-- 일정 등록 -->
+	<insert id="insert_schedule">
+		INSERT INTO schedule_tbl(
+		title, description,
+		target_user,
+		test_start_date, test_end_date,
+		event_type,
+		backgroundColor, all_day
+		)
+		VALUES (
+		#{m.title}, #{m.description},
+		#{m.target_user},
+		#{m.start}, #{m.end},
+		#{m.event_type},
+		#{m.backgroundColor}, #{m.all_day}
+		)
+	</insert>
+
+	<!-- 일정 수정 -->
+	<update id="update_schedule">
+		UPDATE schedule_tbl SET
+		title = #{m.title},
+		description = #{m.description},
+		target_user = #{m.target_user},
+		test_start_date = #{m.start},
+		test_end_date = #{m.end},
+		event_type =
+		#{m.event_type},
+		backgroundColor = #{m.backgroundColor},
+		all_day =
+		#{m.all_day}
+		WHERE id = #{m.id}
+	</update>
+
+	<!-- 일정 삭제 -->
+	<delete id="delete_schedule">
+		DELETE FROM schedule_tbl WHERE id = #{check_id};
+	</delete>
+
+
+	<!-- 부서 별 이름 불러오기 -->
+	<select id="select_department" resultType="string">
+		SELECT 
+		code_name 
+		FROM common_code WHERE code_value LIKE '%dept%'
+	</select>
+
+
+	<!-- 부서 별 이름 불러오기 -->
+	<select id="select_user_department" resultType="string">
+		SELECT
+		user_info.kr_name, common_code.code_name
+		FROM((SELECT * FROM user_info)
+		AS user_info
+		LEFT JOIN (SELECT * FROM common_code) AS common_code ON
+		user_info.department = common_code.code_value)
+		WHERE
+		common_code.code_name = #{param}
+	</select>
+
+	<!-- 알람 인벤토리 -->
+	<select id="show_alarm" resultType="HashMap">
+		SELECT *
+		FROM
+		test_alarm_inventory
+		ORDER BY id
+	</select>
+
+	<!-- <select id="show_alarm" resultType="HashMap"> SELECT user_info.kr_name, 
+		common_code.code_name FROM((SELECT * FROM user_info) AS user_info LEFT JOIN 
+		(SELECT * FROM common_code) AS common_code ON user_info.department = common_code.code_value) 
+		</select> -->
+</mapper>

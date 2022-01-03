@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<!-- <typeAliases>
+	<typeAlias alias=""/>
+</typeAliases> 
+camelmap
+-->
+<mapper namespace="com.teraenergy.groupware.vacation.mapper.VacationMapper">
+
+	
+   <insert id="dayOffWrite"  parameterType="hashmap" >
+  
+ 		INSERT INTO day_off_mng (day_off_dt,day_off_type ,all_half_day_type,day_off_stt, day_off_end,day_off_reason,user_id,attend_day_cnt,day_off_use_cnt,elect_approv_id) 
+		VALUES ( #{dayOffDt}, #{dayOffType}, #{allHalfDayType},#{dayOffStt},#{dayOffEnd}, #{dayOffReason},#{userId},#{attendDayCnt}, #{dayOffUseCnt},#{electApprovId})
+        
+    </insert>
+    
+    <!-- 휴가신청 리스트 -->
+   	<select id="list"  parameterType="map" resultType="camelmap">	
+		SELECT *		   
+		FROM day_off_mng
+		WHERE del_yn='N' &amp;&amp; user_id=#{userId} &amp;&amp; e_appv_stat = 'W'
+		ORDER BY day_off_dt DESC;
+		
+	</select>
+	
+	<!-- 휴가승인 리스트 -->
+   	<select id="dayOffListApprove"  parameterType="map" resultType="camelmap">	
+		SELECT *		   
+		FROM day_off_mng
+		WHERE del_yn='N' &amp;&amp; user_id=#{userId} &amp;&amp; e_appv_stat = 'Y'
+		ORDER BY day_off_dt DESC;
+	</select>
+
+	<select id="dayOffDetail"  resultType="camelmap" parameterType="map" >
+        SELECT *
+        FROM day_off_mng
+        WHERE id = #{id}
+    </select>
+    
+        
+   	<select id="electApproId"  resultType="camelmap" parameterType="map" >	
+		SELECT MAX(id) AS elect_approv_id 
+		FROM elect_approv 
+		WHERE user_id = #{userId} &amp;&amp; form_table_name = 'day_off_mng'
+		
+	</select>
+    
+     <select id="electApprovDetail"  resultType="camelmap" parameterType="map" >	
+     	SELECT ea.id
+        FROM  elect_approv AS ea JOIN day_off_mng AS dayOff ON(ea.id=dayOff.elect_approv_id) 
+        WHERE dayOff.id=#{id}		
+	</select>
+    
+    <!-- 휴가승인 -->
+    <update id="approve" parameterType="hashmap" >
+        UPDATE day_off_mng  SET  e_appv_stat = 'Y'
+        WHERE id = #{id}
+    </update>
+    
+    <!-- 휴가반려 -->
+    <update id="companion" parameterType="hashmap" >
+        UPDATE day_off_mng  SET  e_appv_stat = 'N'
+        WHERE id = #{id}
+    </update>
+    
+    <!-- 휴가취소 -->
+    <update id="cancel" parameterType="hashmap" >
+        UPDATE day_off_mng  SET  day_off_cancel = 'Y'
+        WHERE id = #{id}
+    </update>
+    
+    <select id="getAElectApprov" parameterType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO">		
+		SELECT *
+		FROM elect_approv 
+		WHERE id=#{id} &amp;&amp; user_id=#{userId}
+		AND del_yn='N'
+		LIMIT 1
+	</select>
+	
+	<select id="getAElectApprovCommon" parameterType="int" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovVO">		
+		SELECT
+		*
+		FROM day_off_mng
+		WHERE elect_approv_id=#{electApprovId}
+		LIMIT 1
+	</select>
+	
+	<select id="getRefUsers_for_detail_page" parameterType="int" resultType="com.teraenergy.common.vo.UserVO">		
+		SELECT
+		ui.user_id
+		,ui.kr_name
+		,cc.code_value
+		,cc.code_name
+		,cc.seq
+		FROM elect_approv_ref as eaf
+		LEFT JOIN user_info as ui ON eaf.user_id=ui.user_id
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		WHERE
+		eaf.electapprov_id=#{electapprovId}
+		AND ui.del_yn='N'
+		ORDER BY ui.kr_name
+		LIMIT 1000
+	</select>
+	
+	<select id="getLineUsers" parameterType="int" resultType="com.teraenergy.groupware.elecapproval.vo.ElectApprovLineVO">		
+		SELECT
+		eal.id
+		,eal.user_id
+		,eal.electapprov_id
+		,eal.lvl
+		,eal.b4yn
+		,ui.kr_name
+		,cc.code_value
+		,cc.code_name
+		FROM elect_approv_line as eal
+		LEFT JOIN user_info as ui ON ui.user_id=eal.user_id AND ui.del_yn='N'
+		LEFT JOIN common_code as cc ON cc.code_value=ui.position
+		
+		WHERE 
+		eal.electapprov_id=#{id}
+		ORDER BY eal.lvl
+		LIMIT 1000
+	</select>
+
+</mapper>

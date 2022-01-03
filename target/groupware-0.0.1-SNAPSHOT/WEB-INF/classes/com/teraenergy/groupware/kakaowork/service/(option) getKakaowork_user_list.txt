@@ -1,0 +1,53 @@
+이런형태로 데이터가 이루어진다
+
+
+[
+        {
+            "avatar_url": null,
+            "department": null,
+            "display_name": "박종진",
+            "id": "7129012", //중요
+            "email": "najongjin3@hotmail.com",
+            "name": "박종진",
+            "nickname": null,
+            "position": null,
+            "responsibility": null,
+            "space_id": "178453",
+            "vacation_end_time": null,
+            "vacation_start_time": null,
+            "work_end_time": null,
+            "work_start_time": null
+        },
+        {
+            "avatar_url": null,
+            "department": null,
+            "display_name": "문재영 (문재영)",
+            "id": "7131355", //중요
+            "identifications": taijigom@gmail.com,
+            "name": "문재영",
+            "nickname": "문재영",
+            "position": null,
+            "responsibility": null,
+            "space_id": "178453",
+            "vacation_end_time": null,
+            "vacation_start_time": null,
+            "work_end_time": null,
+            "work_start_time": null
+        },
+        {
+            "avatar_url": null,
+            "department": null,
+            "display_name": "이소영 (이소영)",
+            "id": "7131356", //중요
+            "identifications": "dud9364@gmail.com",
+            "name": "이소영",
+            "nickname": "이소영",
+            "position": null,
+            "responsibility": null,
+            "space_id": "178453",
+            "vacation_end_time": null,
+            "vacation_start_time": null,
+            "work_end_time": null,
+            "work_start_time": null
+        }
+    ]

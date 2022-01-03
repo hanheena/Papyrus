@@ -1,0 +1,20 @@
+이런형태로 데이터가 이루어진다
+
+{
+ avatar_url=null, 
+ department=null, 
+ display_name=박종진, 
+ id=7129012, // 필수 데이터
+ email=null, 
+ name=박종진, 
+ nickname=null, 
+ position=null, 
+ responsibility=null, 
+ space_id=178453, 
+ vacation_end_time=null, 
+ vacation_start_time=null, 
+ work_start_time=null, 
+ work_end_time=null
+ }
+
+ 

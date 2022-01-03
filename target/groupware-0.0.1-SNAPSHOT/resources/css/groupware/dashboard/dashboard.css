@@ -1,0 +1,80 @@
+#main .indoor_temp {
+	width: 100%;
+}
+
+#main .checkbox-inline {
+	margin-right:10px;
+}
+
+#main input[type='radio'].filter {
+	width: 15px;
+	height: 15px;
+	border-radius: 3px;
+	margin-right:3px;
+}
+
+#main input[type='radio'].filter:checked {
+	border: 3px solid #0000008c;
+}
+
+.commute .attend_time, .commute .leave_time {
+	margin-left: 4px;
+}
+
+.dashboard .date-wrap .time {
+    margin-top: 5px;
+    font-size: 0.875rem;
+    margin-left: 4px;
+}
+
+.dashboard .tab-btns ul {
+	background: none !important;
+}
+
+.dashboard .edit-type-ul li:not(:first-child) {
+	margin-right: 10px;
+}
+
+.dashboard .edit-target-textarea {
+    height: 1rem !important;
+    margin: 0 !important;
+}
+
+.dashboard .edit-target-btn {
+    height: 100%;
+    padding: 0.375rem 0.75rem;
+}
+
+.dashboard .targetbutton {
+    padding: 0 5px;
+    border-radius: 3px;	
+    margin-right: 2px;
+}
+
+.dashboard .edit-target-btn {
+	border-color: #ced4da !important;
+}
+.dashboard .edit-target-btn:hover {
+    background-color: #434b56 !important;
+    color: #fff !important;
+}
+
+.dashboard .edit-allDay-area {
+	display: block !important;
+}
+
+.dashboard .desc-area {
+	padding: 1rem 0 !important;
+}
+
+.dashboard .weather .txt .ondo {
+    font-size: 1.5rem !important;
+}
+
+.dashboard li.color label {
+    margin-right: 8px;
+}
+
+.pagemain.dashboard.hr .contents .row>div[class*="col"]>div {
+	height: 100% !important;
+}

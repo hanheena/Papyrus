@@ -1,0 +1,52 @@
+/* 경력사항, 스킬인벤토리 표 출력용 CSS */
+@media screen {
+	#printSection {
+		display: none;
+	}
+}
+
+@media print {
+	body * {
+		visibility: hidden;
+	}
+	#printSection, #printSection * {
+		visibility: visible;
+	}
+	#printSection {
+		position: absolute;
+		left: 0;
+		top: 0;
+	}
+	#careerTable .title, #skillTable .title {
+		font-weight: 700;
+	}
+	#careerTable .table-top, #skillTable .table-top {
+		margin-bottom: 10px;
+	}
+	#careerTable .table-top .txt, #skillTable .table-top .txt {
+		margin-right: 45px;
+	}
+	#careerTable .title, #skillTable .title {
+		text-align: center;
+		margin-bottom: 24px;
+	}
+	#careerTable table th, #careerTable table td, #skillTable table th,
+		#skillTable table td {
+		padding: 10px 5px;
+		text-align: center;
+		border: 1px solid #434b56;
+	}
+	#careerTable table th, #skillTable table th {
+		background-color: #eee !important;
+		-webkit-print-color-adjust: exact;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+	#careerTable table td, #skillTable table td {
+		position: relative;
+		font-size: 13px;
+		font-weight: 500;
+		background: #fff;
+		outline: 1px solid #000;
+	}
+}

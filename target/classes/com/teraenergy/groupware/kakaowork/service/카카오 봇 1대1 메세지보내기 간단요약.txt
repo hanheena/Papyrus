@@ -1,0 +1,104 @@
+https://ujin-dev.tistory.com/62?category=961151
+
+카카오워크 스페이스를 만든 사람이 
+https://kakaowork.com/login?service=admin 관리자 페이지를 가서 맴버들을 초대 해야합니다.
+나머지는 https://ujin-dev.tistory.com/62?category=961151 의 그림만 따라가도 될 정도로 쉽습니다
+
+
+
+https://ujin-dev.tistory.com/63?category=961151
+
+
+카카오워크봇으로 메세지를 보내기 위해서는 3가지 단계가 필요합니다.
+
+1. 유저의 고유 id를 조회해오기.
+KakaoWorkBotMsgService.getKakaowork_user_by_email(이메일)
+함수를 이용하시면 리턴되는 VO가 이런 자료구조로 되어있을 겁니다
+{
+ avatar_url=null, 
+ department=null, 
+ display_name=박종진, 
+ id=7129012, // 필수 데이터
+ email=null, 
+ name=박종진, 
+ nickname=null, 
+ position=null, 
+ responsibility=null, 
+ space_id=178453, 
+ vacation_end_time=null, 
+ vacation_start_time=null, 
+ work_start_time=null, 
+ work_end_time=null
+ }
+여기서 id는 2번의 봇 방을 만들때 반드시 필요한 데이터입니다.
+(참고로 id라는 단어가 중복되서 나오는데, 유저의 key를 뜻하는 id인지, 방의 id인지 햇갈리시면 안됩니다)
+만약 유저 조회가 실패하면 null값이 리턴됩니다.
+
+
+2. 봇이 유저를 1:1 방에 초대하기
+KakaoWorkBotMsgService.open_bot_chatroom(카카오워크_유저_고유id)
+함수를 이용하시면 봇이 1:1 채팅방을 만들면서 유저를 초대합니다.
+이때 유저는 워크스페이스에 초대를 받은 상태에서 자신의 계정에서 인증까지 다 거친 상태여야 합니다.
+안그러면 api는 메세지 보내기 성공이라고 결과를 밷지만 유저에게는 아무 메세지도 오지 않습니다
+
+카카오워크_유저_고유id 이 부분은 1번에서의 id 값입니다.
+
+방 만들기 api 요청이 성공하면 리턴되는 VO는 이런 구조로 되어있을 것입니다.
+{
+avatar_url=null, 
+department=null, 
+display_name=null, 
+id=2092305, // 필수 데이터.
+email=null, 
+name=박종진, 
+nickname=null, 
+position=null, 
+responsibility=null, 
+space_id=null, 
+vacation_end_time=null, 
+vacation_start_time=null, 
+work_start_time=null, 
+work_end_time=null, 
+type=dm, 
+users_count=2
+ }
+여기서 id는 3번의 메세지 보내기를 할때 반드시 필요한 데이터입니다.
+만약 방 만들기가 실패하면 null값이 리턴됩니다.
+
+
+3. 유저에게 메세지 보내기
+KakaoWorkBotMsgService.send_bot_msg_to_user(카카오워크_봇_방id)
+함수를 이용하시면 실제 유저에게 메세지가 전송됩니다.
+
+카카오워크_봇_방id 는 2번에서의 id값입니다.
+
+메세지 보내기 api가 성공하면 이런 형태의 vo를 리턴합니다
+{
+avatar_url=null, 
+department=null, 
+display_name=null, 
+id=388499455904215040, 
+email=null, 
+name=null, 
+nickname=null, 
+position=null, 
+responsibility=null, 
+space_id=null, 
+vacation_end_time=null, 
+vacation_start_time=null, 
+work_start_time=null, 
+work_end_time=null, 
+type=null, 
+users_count=null, 
+conversation_id=2092305, 
+send_time=1638926288, 
+text=test 2021-12-08 2, 
+update_time=1638926288, 
+user_id=7129076
+ }
+이미 메세지가 성공적으로 보내져서 딱히 더이상 해줄건 없습니다.
+만약 메세지 보내기가 실패하면 null값이 리턴됩니다.
+
+
+해당 함수를 사용하는 샘플은 KakaoWorkController/ @GetMapping(value = "/teware/kakawork_botmsg_sample" )
+이곳에 있습니다

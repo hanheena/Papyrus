@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teraenergy.common.file.mapper.CommonAttachFileMapper">
+	
+
+	<select id="getFile" parameterType="com.teraenergy.common.file.model.CommonAttachFileModel" resultType="com.teraenergy.common.file.model.CommonAttachFileModel">		
+		SELECT
+		*
+		FROM comm_attach_file
+		WHERE file_id=#{fileId} 
+		AND del_yn='N'
+	</select>
+		
+	<select id="getFileList" parameterType="com.teraenergy.common.file.model.CommonAttachFileModel" resultType="com.teraenergy.common.file.model.CommonAttachFileModel">		
+		SELECT
+		*
+		FROM comm_attach_file
+		WHERE ref_id=#{refId}
+		AND ref_type=#{refType}
+		AND del_yn='N'
+	</select>
+	<select id="getAFileForFileDelete" parameterType="com.teraenergy.common.file.model.CommonAttachFileModel" resultType="com.teraenergy.common.file.model.CommonAttachFileModel">		
+		SELECT
+		*
+		FROM comm_attach_file
+		WHERE file_id=#{fileId} 
+	</select>
+		
+	<insert id="insertCommonAttachFile" parameterType="com.teraenergy.common.file.model.CommonAttachFileModel" useGeneratedKeys="true" keyProperty="fileId">
+		insert into
+		comm_attach_file(
+			enc_nm
+			,org_nm
+			,path
+			,size
+			,ext
+			,ref_id
+			,ref_type
+			,category
+			,insert_id
+			,mimetype
+	
+		) values (
+		#{encNm,jdbcType=VARCHAR}
+		,#{orgNm,jdbcType=VARCHAR}
+		,#{path,jdbcType=VARCHAR}
+		,#{size,jdbcType=VARCHAR}
+		,#{ext,jdbcType=VARCHAR}
+		,#{refId,jdbcType=VARCHAR}
+		,#{refType,jdbcType=VARCHAR}
+		,#{category,jdbcType=VARCHAR}
+		,#{insertId,jdbcType=VARCHAR}
+		,#{mimetype,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<delete id="deleteCommonAttachFile" parameterType="com.teraenergy.common.file.model.CommonAttachFileModel">
+		UPDATE comm_attach_file
+		SET del_yn='Y'
+		WHERE file_id IN (#{fileId})
+	</delete>
+	
+	<select id="etcFilelist"  parameterType="com.teraenergy.common.file.model.CommonAttachFileModel" resultType="com.teraenergy.common.file.model.CommonAttachFileModel">
+		SELECT a.code_value, a.code_name, b.file_id, b.org_nm, date_format(b.insert_dt,'%Y-%m-%d') as reg_dt
+		FROM common_code a, comm_attach_file b
+		WHERE a.code_value = b.category
+		AND b.del_yn = 'N'
+		AND b.ref_id = #{refId}
+		AND b.ref_type = #{refType}
+	</select>
+	
+</mapper>

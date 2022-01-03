@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teraenergy.groupware.dashboard.mapper.CommuteMapper">
+
+	<!-- 출퇴근 정보 가져오기 -->
+	<select id="get_commute" resultType="java.util.HashMap">
+		SELECT
+		<!-- date_format(attend_date, '%y-%m-%d %H:%i') AS attend_date, date_format(leave_date, 
+			'%y-%m-%d %H:%i') AS leave_date, -->
+		attend_date, leave_date,
+		user_id, commute_type, base_date
+		FROM commute_test_tbl
+		WHERE user_id = #{m.user_id} AND base_date = #{m.base_date};
+	</select>
+
+	<!-- 출근 시간 등록 -->
+	<insert id="insert_attend">
+		INSERT INTO commute_test_tbl(
+		user_id, attend_date,
+		commute_type, base_date
+		)
+		VALUES (
+		#{m.user_id}, #{m.attend_date}, 1, #{m.base_date}
+		)
+		ON DUPLICATE KEY UPDATE attend_date = #{m.attend_date};
+	</insert>
+
+	<!-- 퇴근 시간 등록 -->
+	<insert id="insert_leave">
+		INSERT INTO commute_test_tbl(
+		user_id, leave_date,
+		commute_type, base_date
+		)
+		VALUES (
+		#{m.user_id}, #{m.leave_date}, 2, #{m.base_date}
+		)
+		ON DUPLICATE KEY UPDATE leave_date = #{m.leave_date};
+	</insert>
+</mapper>

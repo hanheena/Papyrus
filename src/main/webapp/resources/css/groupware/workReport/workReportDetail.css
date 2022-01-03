@@ -1,0 +1,8 @@
+.btnSet {
+	text-align: center;
+	margin: 10px auto;
+}
+
+table td:nth-child(2n) {
+	text-align: left;
+}

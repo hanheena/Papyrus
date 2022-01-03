@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.teraenergy.groupware.dashboard.mapper.DashboardMapper">
+
+	<!-- 테스트 select -->
+	<!-- <select id="getBoard" resultType="camelmap"> -->
+	<select id="getBoard" resultType="java.util.HashMap">
+		SELECT *
+		FROM test_tbl
+		ORDER BY
+		id
+	</select>
+
+	<!-- 이미지 첨부 예시 소스 -->
+	<!-- <insert id="insert_file"> INSERT INTO test_tbl(title, content, user, 
+		file_path) VALUES ("test_title", "test_content", "aaa", #{filePath}) </insert> -->
+</mapper>
